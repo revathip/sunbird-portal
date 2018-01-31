@@ -27,6 +27,12 @@ angular.module('playerApp').service('courseQuestionsAdapter', ['$rootScope', '$h
         $rootScope.messages.fmsg.m0070)
     }
 
+    this.updateFlag = function (replyId) {
+      var data = ''
+      return handleHttpRequest('/discussions/v1/thread/flag/' + replyId, data, 'POST',
+        $rootScope.messages.fmsg.m0070)
+    }
+
     function handleHttpRequest (url, data, type, errMsg) {
       var deferred = $q.defer()
       var response = httpAdapter.httpCall(url, data, type)
