@@ -14,6 +14,13 @@
 		<div class="item" ng-repeat="thread in threads">
 			<div class="content">
 				<a ng-click="gotoThread(thread.id)" class="header quesHeading">{{thread.title}}</a>
+				<div class="ui comments">
+					<div class="right floated column comment">
+						<div class="metadata">
+							<div class="right aligned column date">{{thread.created_at | date : longdate}}&nbsp;</div>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -86,13 +93,14 @@
 			<div class="content" >
 				<div class="metadata">
 					<i class="large user icon"></i>
-					<div class="date">{{reply.created_at | date : longdate}}</div>
+					<div class="date">{{reply.created_at | date : longdate}}</div>{{reply.user_id}}
 					<div ng-if="$parent.userName!= reply.username" class="cursor-pointer" ng-click="upVote(reply.id)"><i class="large thumbs up icon"></i></div>
+					 <a class="flag" ng-click="flagAnswer(reply.id)" title="Flas as spam"><i class="flag icon"></i></a>	 
 				</div>
 				<div class="text" ng-bind-html="reply.cooked">
 				</div>
 				<div class="actions">            
-	            <a class="flag" ng-click="flagAnswer(reply.id)"><i class="flag icon"></i></a>	           
+	                 <a class="markCorrect" ng-click="markCorrect(reply.user_id)" title="Mark as correct answer" ng-if="reply.user_id == '5001'" ng-hide="selectedAnswer">Mark as correct answer </a> <i ng-if="selectedAnswer" ng-click="unMarkCorrect(reply.user_id)" class="check circle outline icon ui green"></i>	      
 	          </div>
 				
 			</div>

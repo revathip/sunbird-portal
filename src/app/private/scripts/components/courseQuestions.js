@@ -2,16 +2,18 @@
 
 angular.module('playerApp').component('courseQuestions', {
   templateUrl: 'views/course/courseQuestions.html',
-  controller: ['$scope', '$rootScope', '$timeout', 'courseQuestionsAdapter', function ($scope, $rootScope,
-    $timeout, courseQuestionsAdapter) {
-    console.log('username',$rootScope.userName)
+  controller: ['$scope', '$rootScope', '$timeout', 'courseQuestionsAdapter', '$stateParams' , function ($scope, $rootScope,
+    $timeout, courseQuestionsAdapter, $stateParams) {
+    console.log('username',$rootScope.$stateParamsuserName)
     $scope.userName = $rootScope.userName
     $scope.successMessage = true
     $scope.date = new Date()
-    $scope.loadQuestions = function () {
+    $scope.contextId = $stateParams.courseId    
+    console.log("contextId", $scope.contextId)
+    $scope.loadQuestions = function (contextId) {
       $scope.loading = true
       $scope.widget = ''
-      courseQuestionsAdapter.getQuestions().then(function (data) {
+      courseQuestionsAdapter.getQuestions($scope.contextId).then(function (data) {
         $scope.loading = false
         $scope.widget = 'list-thread'
         $scope.thread = null
@@ -43,7 +45,8 @@ angular.module('playerApp').component('courseQuestions', {
     $scope.loadThread = function (threadId) {
       $scope.loading = true
       $scope.widget = ''
-      courseQuestionsAdapter.getQuestionById(threadId).then(function (data) {
+      $scope.postedBy = '2222'
+      courseQuestionsAdapter.getQuestionById(threadId, $scope.postedBy).then(function (data) {
         $scope.loading = false
         $scope.widget = 'reply-thread'
         console.log('data', data)
@@ -52,6 +55,17 @@ angular.module('playerApp').component('courseQuestions', {
         $scope.loading = false
         console.log('err', err)
       })
+    }
+
+    $scope.markCorrect = function (userId){
+      $scope.selectedAnswer = false
+      if (userId == '5001'){
+          $scope.selectedAnswer = true
+      }
+    }
+
+    $scope.unMarkCorrect = function (){
+      $scope.selectedAnswer = false
     }
 
     $scope.formSubmit = function (isValid) {
@@ -88,7 +102,10 @@ angular.module('playerApp').component('courseQuestions', {
 
     $scope.flagAnswer = function (replyId){
       console.log('replyId',replyId)
-      courseQuestionsAdapter.updateFlag(replId).then(function (data) {
+      /*var obj = {
+        'actionType': replyId
+      }*/
+      courseQuestionsAdapter.updateFlag(replyId).then(function (data) {
          console.log('result of updateFlag: ',data)
       }, function (err) {
         console.log('Error in flagAnswer', err)

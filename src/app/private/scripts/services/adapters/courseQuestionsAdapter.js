@@ -3,12 +3,13 @@
 angular.module('playerApp').service('courseQuestionsAdapter', ['$rootScope', '$http',
   'httpAdapter', '$q', 'toasterService',
   function ($rootScope, $http, httpAdapter, $q, toasterService) {
-    this.getQuestions = function () {
-      var data = ''
+    this.getQuestions = function (contextId) {
+      var data = contextId
+      console.log('contextId in adapter: ',contextId)
       return handleHttpRequest('/discussions/v1/list', data, 'GET',
         'Error while loading questions, please try again later')
     }
-    this.getQuestionById = function (threadId) {
+    this.getQuestionById = function (threadId, postedBy) {
       var data = ''
       return handleHttpRequest('/discussions/v1/thread/' + threadId, data, 'GET',
         'Error while loading questions, please try again later')
@@ -33,10 +34,10 @@ angular.module('playerApp').service('courseQuestionsAdapter', ['$rootScope', '$h
         'Error while voting, please try again')
     }
 
-    this.updateFlag = function (replyId) {
+    this.updateFlag = function (replyId, obj) {
       var data = ''
       return handleHttpRequest('/discussions/v1/thread/flag/' + replyId, data, 'POST',
-        $rootScope.messages.fmsg.m0070)
+        'Error in flag')
     }
 
     function handleHttpRequest (url, data, type, errMsg) {
