@@ -35,12 +35,12 @@ class ThreadService {
 		/**
 		 * @property {string} discourseEndPoint - An endpoint url for discourse api
 		 */
-		this.discourseEndPoint = 'http://13.127.45.190'
+		this.discourseEndPoint = 'http://f54ae447.ngrok.io'
 		/**
 		 * @property {object} discourseUriList - List of discourse uri's
 		 */
 		this.discourseUris = {
-			list: '/latest.json?order=created',
+			list: '/tags/',
 			getOne: '/t/',
 			postThread: '/posts',
 			users: '/users',
@@ -48,15 +48,10 @@ class ThreadService {
 		}
 
 		this.apiAuth = {
-			apiKey: '3afbd4429b6a98e9a3d5b73d29fb7ce5e1e440a88a9bfd7deaf7fa2ff845ba3c',
+			apiKey: '799a56a3e22eeef0f49640d781e8eebca6637fda4640e96b377d0aadc0c1a512',
 			apiUserName: 'loganathan'
 		}
-		this.actionTypes = {
-			'spam': 8,
-			'inappropriate': 4,
-			'offtopic': 3,
-			'other': 7
-		}
+
 	}
 
 
@@ -125,73 +120,17 @@ class ThreadService {
 	 *create discourse topic
 	 *
 	 */
-	flagPost(flagData) {
+	postActions(actionData) {
 
 		return new Promise((resolve, reject) => {
-			this.createUserIfNotExists(flagData.userName).then((success) => {
-
-
-				let formData = {
-					api_key: this.apiAuth.apiKey,
-					api_username: flagData.userName,
-					id: flagData.id,
-					post_action_type_id: this.actionTypes[flagData.actionType],
-					message: flagData.messsage
-				}
-				let options = {
-					method: 'POST',
-					uri: this.discourseEndPoint + this.discourseUris.postActions,
-					form: formData
-				}
-				this.httpService.call(options).then((data) => {
-					let res = JSON.parse(data.body)
-					if (res.id) {
-						resolve(res.id)
-					} else {
-
-						reject(new AppError({
-							message: 'Discourse error',
-							status: HttpStatus.INTERNAL_SERVER_ERROR
-						}))
-					}
-				}, (error) => {
-						console.log("error ",error)
-					reject(new AppError({
-						message: 'Discourse error',
-						status: HttpStatus.INTERNAL_SERVER_ERROR
-					}))
-				})
-			}, (error) => {
-				console.log("error ",error)
-				reject(new AppError({
-					message: 'Discourse user creation error',
-					status: HttpStatus.INTERNAL_SERVER_ERROR
-				}))
-			}).catch((error) => {
-				reject(new AppError({
-					message: 'Discourse user error',
-					status: HttpStatus.INTERNAL_SERVER_ERROR
-				}))
-			})
-		})
-	}
-
-
-	/*
-	 *create discourse topic
-	 *
-	 */
-	likePost(likeData) {
-
-		return new Promise((resolve, reject) => {
-			this.createUserIfNotExists(likeData.userName).then((success) => {
+			this.createUserIfNotExists(actionData.userName).then((success) => {
 
 				let isReply = false
 				let formData = {
 					api_key: this.apiAuth.apiKey,
-					api_username: likeData.userName,
-					id: likeData.id,
-					post_action_type_id: likeData.actionTypeId
+					api_username: actionData.userName,
+					id: actionData.id,
+					post_action_type_id: actionData.actionTypeId
 				}
 				let options = {
 					method: 'POST',
@@ -215,6 +154,11 @@ class ThreadService {
 						message: 'Discourse error',
 						status: HttpStatus.INTERNAL_SERVER_ERROR
 					}))
+				}).catch((error) => {
+					reject({
+						message: 'Discourse action error',
+						status: HttpStatus.INTERNAL_SERVER_ERROR
+					})
 				})
 			}, (error) => {
 				reject(new AppError({
@@ -248,7 +192,8 @@ class ThreadService {
 				if (threadData.topic_id) {
 					formData.topic_id = threadData.topic_id
 					formData.title = undefined
-					isReply = true
+				} else {
+					formData["tags[]"] = threadData.contextId
 				}
 
 				let options = {
@@ -295,15 +240,23 @@ class ThreadService {
 	/*
 	 * Get threads
 	 */
-	getRecentThreads() {
+	getRecentThreads(userName, contextId) {
 		return new Promise((resolve, reject) => {
-			let options = {
-				method: 'GET',
-				uri: this.discourseEndPoint + this.discourseUris.list
-			}
-			this.httpService.call(options).then((data) => {
-				let res = JSON.parse(data.body)
-				resolve(res.topic_list.topics)
+			this.createUserIfNotExists(userName).then((success) => {
+				let options = {
+					method: 'GET',
+					uri: this.discourseEndPoint + this.discourseUris.list + contextId + '.json?order=created&api_username=' + userName + '&api_key=' + this.apiAuth.apiKey
+				}
+				this.httpService.call(options).then((data) => {
+
+					let res = JSON.parse(data.body)
+					resolve(res.topic_list.topics)
+				})
+			}, (error) => {
+				reject(new AppError({
+					message: 'Discourse user creation error',
+					status: HttpStatus.INTERNAL_SERVER_ERROR
+				}))
 			})
 		}).catch((error) => {
 			reject(new AppError({
@@ -316,14 +269,15 @@ class ThreadService {
 	/*
 	 * Get thread by its id
 	 */
-	getThreadById(id) {
+	getThreadById(id, userName) {
 		return new Promise((resolve, reject) => {
 			let options = {
 				method: 'GET',
-				uri: this.discourseEndPoint + this.discourseUris.getOne + id + '.json'
+				uri: this.discourseEndPoint + this.discourseUris.getOne + id + '.json?api_username=' + userName + '&api_key=' + this.apiAuth.apiKey
 			}
 			this.httpService.call(options).then((data) => {
 				let res = JSON.parse(data.body)
+
 				let posts = res.post_stream.posts
 				let description = posts[0].cooked
 				posts.splice(0, 1)
