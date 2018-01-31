@@ -13,7 +13,9 @@ const API_IDS = {
   createthread: 'create-thread',
   listthreads: 'list-threads',
   replythread: 'reply-thread',
-  getthreadbyid: 'get-thread-by-id'
+  getthreadbyid: 'get-thread-by-id',
+  likepost:'like-post',
+  flagpost:'flag-post'
 }
 
 let threadController = new ThreadController({
@@ -136,6 +138,24 @@ module.exports = function (keycloak) {
       })
       .catch((err) => {
         sendErrorResponse(responseObj, API_IDS.replythread, err.message, err.status)
+      })
+  })
+  router.post('/thread/likepost/:id', (requestObj, responseObj, next) => {
+    threadController.likePost(requestObj)
+      .then((data) => {
+        sendSuccessResponse(responseObj, API_IDS.likepost, data, HttpStatus.OK)
+      })
+      .catch((err) => {
+        sendErrorResponse(responseObj, API_IDS.likepost, err.message, err.status)
+      })
+  })
+  router.post('/thread/flag/:id', (requestObj, responseObj, next) => {
+    threadController.flagPost(requestObj)
+      .then((data) => {
+        sendSuccessResponse(responseObj, API_IDS.flagpost, data, HttpStatus.OK)
+      })
+      .catch((err) => {
+        sendErrorResponse(responseObj, API_IDS.flagpost, err.message, err.status)
       })
   })
   return router
