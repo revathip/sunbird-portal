@@ -76,9 +76,9 @@ angular.module('playerApp').component('courseQuestions', {
     }
 
     $scope.flagAnswer = function (replyId){
-      console.log("replyId",replyId);
-      courseQuestionsAdapter.updateFlag(replyId).then(function (data) {
-         console.log("result of updateFlag: ",data)
+      console.log('replyId',replyId)
+      courseQuestionsAdapter.updateFlag(replId).then(function (data) {
+         console.log('result of updateFlag: ',data)
       }, function (err) {
         console.log('Error in flagAnswer', err)
       })      
