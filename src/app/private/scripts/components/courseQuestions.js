@@ -2,15 +2,9 @@
 
 angular.module('playerApp').component('courseQuestions', {
   templateUrl: 'views/course/courseQuestions.html',
-<<<<<<< HEAD
-  controller: ['$scope', '$rootScope', '$timeout', 'courseQuestionsAdapter', '$stateParams' , function ($scope, $rootScope,
-    $timeout, courseQuestionsAdapter, $stateParams) {
-    console.log('username',$rootScope.$stateParamsuserName)
-=======
   controller: ['$scope', '$rootScope', '$timeout', 'courseQuestionsAdapter','$stateParams', function ($scope, $rootScope,
     $timeout, courseQuestionsAdapter,$stateParams) {
     console.log('username', $rootScope.userName)
->>>>>>> dab09be283443210f3421d5e1966e338ece0a44c
     $scope.userName = $rootScope.userName
     $scope.successMessage = true
     $scope.date = new Date()
@@ -19,11 +13,7 @@ angular.module('playerApp').component('courseQuestions', {
     $scope.loadQuestions = function (contextId) {
       $scope.loading = true
       $scope.widget = ''
-<<<<<<< HEAD
-      courseQuestionsAdapter.getQuestions($scope.contextId).then(function (data) {
-=======
       courseQuestionsAdapter.getQuestions($stateParams.courseId).then(function (data) {
->>>>>>> dab09be283443210f3421d5e1966e338ece0a44c
         $scope.loading = false
         $scope.widget = 'list-thread'
         $scope.thread = null
